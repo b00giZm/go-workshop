@@ -3,32 +3,30 @@ package store
 import (
 	"os"
 	"strings"
-	//"fmt"
 )
 
 type Store map[string]string
 
-func Open(filename string) (Store, error) {
-	storePath := os.TempDir() + filename
-	fileInfo, err := ensureFile(storePath);
+func Open(name string) (Store, error) {
+	file, err := createOrOpen(os.TempDir() + name)
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := os.Open(storePath)
+	fileInfo, err := file.Stat()
 	if err != nil {
 		return nil, err
 	}
 
 	defer file.Close()
 
-	fileSize := fileInfo.Size()
-	if fileSize <= 0 {
+	if fileInfo.Size() <= 0 {
 		return Store{}, nil
 	}
 
 	// Reading the whole db into a byte array. Do not do this in a real world application!
-	bytes := make([]byte, fileSize)
+	// See session01/kv2/store.go for a better solution
+	bytes := make([]byte, fileInfo.Size())
 	if _, err := file.Read(bytes); err != nil {
 		return nil, err
 	}
@@ -44,9 +42,8 @@ func Open(filename string) (Store, error) {
 	return store, nil
 }
 
-func Write(filename string, store Store) (bool, error) {
-	storePath := os.TempDir() + filename
-	file, err := os.Create(storePath)
+func Write(name string, store Store) (bool, error) {
+	file, err := createOrOpen(storePath := os.TempDir() + name)
 	if err != nil {
 		return false, err
 	}
@@ -62,21 +59,20 @@ func Write(filename string, store Store) (bool, error) {
 	return true, nil
 }
 
-func ensureFile(filePath string) (os.FileInfo, error) {
-	fileInfo, err := os.Stat(filePath);
-	if os.IsNotExist(err) {
-		file, err := os.Create(filePath)
+func createOrOpen(name string) (*os.File, error) {
+	if _, err := os.Stat(name); os.IsNotExist(err) {
+		file, err := os.Create(name)
 		if err != nil {
 			return nil, err
 		}
 
-		fileInfo, err = file.Stat();
-		if err != nil {
-			return nil, err
-		}
-
-		return fileInfo, nil
+		return file, nil
 	}
 
-	return fileInfo, nil
+	file, err := os.OpenFile(name, os.O_RDWR, os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }
