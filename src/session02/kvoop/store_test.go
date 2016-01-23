@@ -1,11 +1,24 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"session02/kvoop/storage"
 )
+
+func TestDefaultStore(t *testing.T) {
+	store, _ := NewDefaultStore()
+	r := reflect.ValueOf(store.Storage).Elem().Interface()
+	//switch store.Storage.(type) {
+	switch r.(type) {
+	case storage.FileStorage:
+		return
+	default:
+		t.Fail()
+	}
+}
 
 func TestGet(t *testing.T) {
 	ctrl := gomock.NewController(t)
