@@ -27,7 +27,7 @@ func NewFileStorage(name string) (*FileStorage, error) {
 	return fileStorage, nil
 }
 
-func (f *FileStorage) Get(key string) (string, bool) {
+func (f *FileStorage) Get(key string) (interface{}, bool) {
 	value, found := f.mapper[key]
 	return value, found
 }

@@ -32,7 +32,7 @@ func (s *Store) GetMultiple(keys []string) storage.KeyValueMap {
 	for _, key := range keys {
 		value, found := s.Get(key)
 		if found {
-			subMap[key] = value
+			subMap[key] = value.(string)
 		}
 	}
 
