@@ -43,7 +43,7 @@ func Open(name string) (Store, error) {
 }
 
 func Write(name string, store Store) (bool, error) {
-	file, err := createOrOpen(storePath := os.TempDir() + name)
+	file, err := createOrOpen(os.TempDir() + name)
 	if err != nil {
 		return false, err
 	}
